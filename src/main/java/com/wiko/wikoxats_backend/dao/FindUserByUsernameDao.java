@@ -11,7 +11,12 @@ import java.sql.ResultSet;
 public class FindUserByUsernameDao {
     public static FindUserByUsernameDao instance;
     private FindUserByUsernameService service;
-    private DBConnectionMgr mgr = null;
+    private DBConnectionMgr mgr;
+
+    private FindUserByUsernameDao()  {
+        service = service.getInstance();
+        mgr = DBConnectionMgr.getInstance();
+    }
 
     public static FindUserByUsernameDao getInstance() {
         if (instance == null) {
@@ -21,9 +26,6 @@ public class FindUserByUsernameDao {
         return instance;
     }
 
-    private FindUserByUsernameDao() {
-        service = service.getInstance();
-    }
 
     public User findUsernameByUsername(String username) {
         User foundUser = null;
@@ -38,6 +40,7 @@ public class FindUserByUsernameDao {
                     select
                         user_id,
                         username,
+                        password,
                         name,
                         email,
                         phone_num,
@@ -55,6 +58,7 @@ public class FindUserByUsernameDao {
                 foundUser = User.builder()
                         .userId(rs.getInt(1))
                         .username(rs.getString(2))
+                        .password(rs.getString(3))
                         .name(rs.getString(4))
                         .email(rs.getString(5))
                         .phoneNum(rs.getString(6))
@@ -65,9 +69,8 @@ public class FindUserByUsernameDao {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            mgr.freeConnection(con, ps);
+            mgr.freeConnection(con, ps, rs);
         }
-
 
         return foundUser;
     }
